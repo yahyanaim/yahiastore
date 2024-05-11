@@ -17,7 +17,8 @@ export const registerController = async (req, res) => {
       email,
     });
     if (userExists) {
-      return res.status(400).send({
+      return res.statue(200).send({
+        success: false,
         message: "User already exists",
       });
     }
@@ -35,12 +36,14 @@ export const registerController = async (req, res) => {
       answer,
     }).save();
     res.status(201).send({
+      success: true,
       message: "User registered successfully",
       user,
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
+      success: false,
       message: "Internal server error",
       error: error.message,
     });
@@ -96,6 +99,7 @@ export const loginController = async (req, res) => {
         email: user.email,
         phone: user.phone,
         address: user.address,
+        role: user.role,
       },
       token, 
     });
@@ -107,6 +111,47 @@ export const loginController = async (req, res) => {
     });
   }
 };
+
+//forget password forgotPasswordController
+export const forgotPasswordController = async (req, res) => {
+  try {
+    const {email,answer,newPassword} = req.body
+    if (!email){
+      res.statue(400).send({message:'Email is required'})
+    }
+    if (!answer){
+      res.statue(400).send({message:'answer is required'})
+    }
+    if (!newPassword){
+      res.statue(400).send({message:'New password is required'})
+    }
+// check 
+const user = await userModels.findOne({email, answer});
+// Validation 
+if(!user){
+  return res.status(404).send({
+    success: false,
+    message: 'Wrong Email or answer'
+  });
+  }
+  const hashed = await hashPassword(newPassword)
+  await userModels.findByIdAndUpdate(user._id, {password: hashed});
+  res.status(200).send({
+    success: true,
+    message: 'Password reset successfully'
+  });
+
+}
+    catch (error){
+      console.log(error)
+      res.status(500).send({
+        success: false,
+        message: 'something went wrong',
+        error 
+      });
+    }
+  };
+
 
 //test controller
 export const testController = async (req, res) => {

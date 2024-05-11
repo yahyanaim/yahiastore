@@ -2,7 +2,7 @@ import Jwt from "jsonwebtoken";
 import userModels from "../models/userModels.js";
 
 //protected routes
-export const authMiddleware = async (req, res, next) => {
+export const requireSignIn = async (req, res, next) => {
   try {
     const token = req.header("Authorization");
     if (!token) {
